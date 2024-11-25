@@ -1,4 +1,6 @@
-import pytest, os, tempfile, textwrap, tomlkit  # noqa: E401
+import pytest, os, tempfile, textwrap, sys
+from pathlib import Path
+
 from pick import pick
 
 
