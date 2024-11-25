@@ -20,7 +20,7 @@ def usage():
     print("")
     sys.exit(1)
 
-def parse_input(value,decr_pos=False):
+def parse_input(value,should_decr_pos=False):
     "parses value into an int, or an int:Optional[int] slice"
     retval = None
     if ":" in value:
@@ -29,7 +29,7 @@ def parse_input(value,decr_pos=False):
                      int(end.strip()) if end.strip() else None)
     else:
         retval = int(value)
-    if not decr_pos:
+    if not should_decr_pos:
       return retval
     else:
       def decr_pos(i): return (i-1) if (isinstance(i, int) and i > 0) else i
@@ -69,6 +69,9 @@ def apply_filters(i, row, col, line):
             print_filtered_line(line,col)
     elif i == row:
         print_filtered_line(line,col)
+
+def pick(s:str):
+    return ""
 
 def main():
     onebased = False
