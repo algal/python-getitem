@@ -26,22 +26,30 @@ def parse_slice_spec(value:str,should_decr_pos:bool=False) -> int | slice:
         print('unreachable')
         sys.exit(1)
 
-def split_with_positions(input_str, pattern):
-    return [(match.group(), match.start(), match.end()) for match in re.finditer(pattern, input_str)]
+def split_with_positions2(str_to_split, pattern):
+    "Returns (s,beg,end) for every substring in between the split"
+    result = []
+    last_end = 0
+    for match in re.finditer(pattern, str_to_split):
+        if match.start() > last_end:
+            result.append((str_to_split[last_end:match.start()], last_end, match.start()))
+        last_end = match.end()
+    if last_end < len(str_to_split):
+        result.append((str_to_split[last_end:], last_end, len(str_to_split)))
+    return result
 
 def filtered_line(line:str, col: int | slice) -> str | None:
     "col : a slice or int"
     line = line.rstrip()
-    fields = split_with_positions(line, r'\S+|\s+')
-    non_space_fields = [field for field in fields if not field[0].isspace()]
-    if not non_space_fields:
+    fields = split_with_positions2(line, r'\s+')
+    if not fields:
         return None
     if isinstance(col, slice):
-        start_pos = non_space_fields[col.start][1] if col.start is not None else 0
-        end_pos = non_space_fields[col.stop-1][2] if col.stop is not None else len(line)
+        start_pos = fields[col.start][1] if col.start is not None else 0
+        end_pos   = fields[col.stop-1][2] if col.stop is not None else len(line)
         return line[start_pos:end_pos]
     else:
-        return non_space_fields[col][0]
+        return fields[col][0]
 
 def pick(lines:Iterable[str],row_spec:str,col_spec:str) -> Iterable[str]:
     row = parse_slice_spec(row_spec)
@@ -52,7 +60,11 @@ def pick(lines:Iterable[str],row_spec:str,col_spec:str) -> Iterable[str]:
         if out: yield out
 
 def super_islice(iterable,slice_spec:str) -> Iterable:
-    "slice_spec, a str of an index or a splice, like '-5:' etc.."
+    """
+    slice_spec, a str of an index or a splice, like '-5:' etc..
+
+    Consumes iterable once. Maintains a buffer if necessary.
+    """
     if ":" in slice_spec:
         beg,end = tuple(slice_spec.split(":"))
         beg = 0 if beg=='' else int(beg)
