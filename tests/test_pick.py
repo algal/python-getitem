@@ -82,12 +82,12 @@ def test_run(pidx:int):
 
 def test_parse_slices():
     from pick import parse_slice_spec
-    assert parse_slice_spec("5") == 5
-    assert parse_slice_spec("0") == 0
-    assert parse_slice_spec("-5") == -5
+    assert parse_slice_spec("5") == slice(5,6)
+    assert parse_slice_spec("0") == slice(0,1)
+    assert parse_slice_spec("-5") == slice(-5,-4)
     assert parse_slice_spec("1:1") == slice(1,1)
-    assert parse_slice_spec("5:") == slice(5,None)
+    assert parse_slice_spec("5:") == slice(5,float('inf'))
     assert parse_slice_spec("-5:-2") == slice(-5,-2)
-    assert parse_slice_spec("-5:") == slice(-5,None)
+    assert parse_slice_spec("-5:") == slice(-5,float('inf'))
     assert parse_slice_spec(":-5") == slice(0,-5)
     

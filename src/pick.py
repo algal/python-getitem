@@ -4,27 +4,16 @@ import sys, re, argparse
 from collections import deque
 from collections.abc import Iterable
 
-def parse_slice_spec(value:str,should_decr_pos:bool=False) -> int | slice:
-    "parses value into an int, or an int:Optional[int] slice"
-    retval = None
-    if ":" in value:
-        start, end = value.split(":")
-        retval = slice(int(start.strip()) if start.strip() else 0,
-                     int(end.strip()) if end.strip() else None)
+def parse_slice_spec(slice_spec:str,should_decr_pos:bool=False) -> slice:
+    "parses value into an (int,int)"
+    if ":" in slice_spec:
+        beg,end = tuple(slice_spec.split(":"))
+        beg = 0 if beg=='' else int(beg)
+        end = float('inf') if end=='' else int(end)
     else:
-        retval = int(value)
-    if not should_decr_pos:
-      return retval
-    else:
-      def decr_pos(i):
-          return (i-1) if (isinstance(i, int) and i > 0) else i
-      if isinstance(retval, int):
-        return decr_pos(retval)
-      elif isinstance(retval, slice):
-        return slice(decr_pos(retval.start),decr_pos(retval.stop))
-      else:
-        print('unreachable')
-        sys.exit(1)
+        beg = int(slice_spec)
+        end = beg + 1 if beg!=-1 else float('inf')
+    return slice(beg,end)
 
 def split_with_positions2(str_to_split, pattern):
     "Returns (s,beg,end) for every substring in between the split"
@@ -38,21 +27,17 @@ def split_with_positions2(str_to_split, pattern):
         result.append((str_to_split[last_end:], last_end, len(str_to_split)))
     return result
 
-def filtered_line(line:str, col: int | slice) -> str | None:
+def filtered_line(line:str, col: slice) -> str | None:
     "col : a slice or int"
     line = line.rstrip()
     fields = split_with_positions2(line, r'\s+')
     if not fields:
         return None
-    if isinstance(col, slice):
-        start_pos = fields[col.start][1] if col.start is not None else 0
-        end_pos   = fields[col.stop-1][2] if col.stop is not None else len(line)
-        return line[start_pos:end_pos]
-    else:
-        return fields[col][0]
+    start_pos = fields[col.start][1]
+    end_pos   = fields[col.stop-1][2] if col.stop != float('inf') else len(line)
+    return line[start_pos:end_pos]
 
 def pick(lines:Iterable[str],row_spec:str,col_spec:str) -> Iterable[str]:
-    row = parse_slice_spec(row_spec)
     column = parse_slice_spec(col_spec)
     out_lines = super_islice(lines,row_spec)
     for line in out_lines:
