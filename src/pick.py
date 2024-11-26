@@ -4,7 +4,7 @@ import sys, re, argparse
 from collections import deque
 from collections.abc import Iterable
 
-def parse_input(value:str,should_decr_pos:bool=False) -> int | slice:
+def parse_slice_spec(value:str,should_decr_pos:bool=False) -> int | slice:
     "parses value into an int, or an int:Optional[int] slice"
     retval = None
     if ":" in value:
@@ -44,8 +44,8 @@ def filtered_line(line:str, col: int | slice) -> str | None:
         return non_space_fields[col][0]
 
 def pick(lines:Iterable[str],row_spec:str,col_spec:str) -> Iterable[str]:
-    row = parse_input(row_spec)
-    column = parse_input(col_spec)
+    row = parse_slice_spec(row_spec)
+    column = parse_slice_spec(col_spec)
     out_lines = super_islice(lines,row_spec)
     for line in out_lines:
         out = filtered_line(line,column)
