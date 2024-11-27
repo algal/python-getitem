@@ -1,7 +1,7 @@
 [project]
 name = "pick"
 version = "0.1.0"
-description = "Add your description here"
+description = "Command line tool for using getitem slice syntax to parse filter text"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
@@ -12,5 +12,12 @@ dev-dependencies = [
 ]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["src/pick"]
+
+
+
+
+
+[project.scripts]
+"pick" = "pick.pick:main"
 

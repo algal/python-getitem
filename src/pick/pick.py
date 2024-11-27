@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import sys, re, argparse
 from collections import deque
 from collections.abc import Iterable
@@ -76,11 +75,13 @@ def super_islice(iterable,slice_spec:str) -> Iterable:
         if beg <= i and i < end:
             yield line
 
-def main():
+def mainOLD():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument("-h","--help", action="help")
+    parser.add_argument("-f","--file", help="Input file path")
     parser.add_argument("row",    type=str, help="Row specification")
     parser.add_argument("column", type=str, help="Column specification")
-    parser.prefix_chars=''
+#    parser.prefix_chars=''
     parser.epilog="""
     Filter stdin and print specific rows and columns, specifying
     them in Python's slicing syntax.
@@ -88,11 +89,38 @@ def main():
     For example:
     cat myfile | ./pick :5 0     # Print the column 0 of the first 5 rows.
     cat myfile | ./pick 0 :      # Print the first row, all of it.
-    cat myfile | ./pick -o 1 :   # Print the first row, all of it.
     cat myfile | ./pick -10 0:2  # Print the first 2 columns of the last 10 rows.
     cat myfile | ./pick -2:-1 : # Prints all fields of the second to last row.
     """
     args = parser.parse_args()
+
+    in_lines = (line for line in sys.stdin)
+    out_lines = pick(in_lines, args.row, args.column)
+    for line in out_lines:
+        print(line)
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
+#    usage='%(prog)s [-h] [-f FILE] row_slice column_slice'
+    usage='%(prog)s [-h] row_slice column_slice'
+                                     )
+#    parser.add_argument("-f","--file", help="Input file path")
+    parser.add_argument("row_col_specs", nargs=argparse.REMAINDER, help="Row and column specifications")
+    parser.epilog="""
+    Filter stdin and print specific rows and columns, specifying
+    them in Python's slicing syntax.
+    
+    For example:
+    cat myfile | ./pick :5 0     # Print the column 0 of the first 5 rows.
+    cat myfile | ./pick 0 :      # Print the first row, all of it.
+    cat myfile | ./pick -10 0:2  # Print the first 2 columns of the last 10 rows.
+    cat myfile | ./pick -2:-1 : # Prints all fields of the second to last row.
+    """
+    args = parser.parse_args()
+
+    if len(args.row_col_specs) != 2:
+        parser.error("Must provide a row_slice and a column_slice spec")
+    row, column = args.row_col_specs
 
     in_lines = (line for line in sys.stdin)
     out_lines = pick(in_lines, args.row, args.column)

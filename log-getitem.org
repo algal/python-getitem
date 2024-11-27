@@ -1,0 +1,10 @@
+* Agenda
+
+- [ ] rename to getitem
+- [ ] enhance not to use buffer when given a path
+- [ ] 
+
+* Log
+
+** 
+
