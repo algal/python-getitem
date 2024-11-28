@@ -49,7 +49,8 @@ def islice(iterable,slice_spec:str) -> Iterable:
 
     Consumes iterable once. Maintains a buffer if necessary.
     """
-    (beg,end) = parse_slice_spec(slice_spec)
+    begend_slice = parse_slice_spec(slice_spec)
+    (beg,end) = (begend_slice.start,begend_slice.stop)
     buf = None
     if beg < 0:
         buf = deque(maxlen=abs(beg))
@@ -69,7 +70,7 @@ def islice(iterable,slice_spec:str) -> Iterable:
             yield line
 
 def main():
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 #    usage='%(prog)s [-h] [-f FILE] row_slice column_slice'
     usage='%(prog)s [-h] row_slice column_slice'
 #    parser.add_argument("-f","--file", help="Input file path")
