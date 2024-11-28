@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import sys, re, argparse
+import sys, re, getopt, pathlib
 from collections import deque
 from collections.abc import Iterable
 
-def parse_slice_spec(slice_spec:str,should_decr_pos:bool=False) -> slice:
+def parse_slice_spec(slice_spec:str,should_decr_pos:bool=False) -> tuple:
     "parses value into an (int,int)"
     if ":" in slice_spec:
         beg,end = tuple(slice_spec.split(":"))
@@ -12,10 +12,10 @@ def parse_slice_spec(slice_spec:str,should_decr_pos:bool=False) -> slice:
     else:
         beg = int(slice_spec)
         end = beg + 1 if beg!=-1 else float('inf')
-    return slice(beg,end)
+    return (beg,end)
 
 def split_with_positions(str_to_split, pattern):
-    "Returns (s,beg,end) for every substring in between the split"
+    "Returns [(s,beg,end)] for the substrings in between the pattern"
     result = []
     last_end = 0
     for match in re.finditer(pattern, str_to_split):
@@ -26,36 +26,43 @@ def split_with_positions(str_to_split, pattern):
         result.append((str_to_split[last_end:], last_end, len(str_to_split)))
     return result
 
-def filtered_line(line:str, col: slice) -> str | None:
+def filtered_line(line:str, col_spec: str) -> str | None:
     "col : a slice or int"
-    line = line.rstrip()
     fields = split_with_positions(line, r'\s+')
-    if not fields:
-        return None
-    start_pos = fields[col.start][1]
-    end_pos   = fields[col.stop-1][2] if col.stop != float('inf') else len(line)
-    return line[start_pos:end_pos]
+    sliced_fields = list(islice(fields,col_spec))
+    if not sliced_fields: return None
+    col = parse_slice_spec(col_spec)
+    start_pos = sliced_fields[  0 ][1]
+    end_pos   = sliced_fields[ -1 ][2]
+    fl = line[start_pos:end_pos] # preserve spacing if passing the whole line
+    if fl == line.strip():
+        return line
+    else:
+        return fl
 
-def pick(lines:Iterable[str],row_spec:str,col_spec:str) -> Iterable[str]:
-    column = parse_slice_spec(col_spec)
-    out_lines = islice(lines,row_spec)
+def pick(lines:Iterable[str],row_spec:str,col_spec:str,line_count=None) -> Iterable[str]:
+    out_lines = islice(lines,row_spec,iterable_len=line_count)
     for line in out_lines:
-        out = filtered_line(line,column)
+        out = filtered_line(line,col_spec)
         if out: yield out
 
-def islice(iterable,slice_spec:str) -> Iterable:
+def islice(iterable,slice_spec:str,iterable_len=None) -> Iterable:
     """
     slice_spec, a str of an index or a splice, like '-5:' etc..
 
     Consumes iterable once. Maintains a buffer if necessary.
     """
-    begend_slice = parse_slice_spec(slice_spec)
-    (beg,end) = (begend_slice.start,begend_slice.stop)
-    buf = None
+    (beg,end) = parse_slice_spec(slice_spec)
+    if hasattr(iterable,'__len__'): iterable_len = len(iterable)
+    if iterable_len is not None:
+        beg = (beg + iterable_len) if (beg<0) else beg
+        end = (end + iterable_len) if (end<0) else end
     if beg < 0:
         buf = deque(maxlen=abs(beg))
     elif end < 0:
         buf = deque()
+    else:
+        buf = None
     if buf is None:
         src = enumerate(iterable)
     else:
@@ -69,14 +76,8 @@ def islice(iterable,slice_spec:str) -> Iterable:
         if beg <= i and i < end:
             yield line
 
-def main():
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-#    usage='%(prog)s [-h] [-f FILE] row_slice column_slice'
-    usage='%(prog)s [-h] row_slice column_slice'
-#    parser.add_argument("-f","--file", help="Input file path")
-    # convoluted parsing needed to allow positional arguments which start with HYPHEN-MINUS
-    parser.add_argument("row_col_specs", nargs=argparse.REMAINDER, help="Row and column specifications")
-    parser.epilog="""
+def usage():
+    epilog="""
     Filter stdin and print specific rows and columns, specifying
     them in Python's slicing syntax.
     
@@ -86,14 +87,37 @@ def main():
     cat myfile | ./pick -10 0:2  # Print the first 2 columns of the last 10 rows.
     cat myfile | ./pick -2:-1 : # Prints all fields of the second to last row.
     """
-    args = parser.parse_args()
+    print(epilog)
 
-    if len(args.row_col_specs) != 2:
-        parser.error("Must provide a row_slice and a column_slice spec")
-    row, column = args.row_col_specs
-
-    in_lines = (line for line in sys.stdin)
-    out_lines = pick(in_lines, args.row, args.column)
+def main():
+    args = sys.argv[1:]
+    input_file = None
+    remaining_args = []
+    
+    i = 0
+    while i < len(args):
+        if args[i] in ('-h', '--help'):
+            print("Usage: program [-h] [-f FILE] row_spec col_spec")
+            usage()
+            sys.exit(0)
+        elif args[i] in ('-f', '--file'):
+            if i + 1 < len(args):
+                input_file = args[i + 1]
+                i += 2
+                continue
+            else:
+                print("Error: -f/--file requires a value")
+                sys.exit(2)
+        remaining_args.append(args[i])
+        i += 1
+    (row,col) = tuple(remaining_args[:2])
+    if (p:=input_file):
+        line_count = sum(1 for _ in open(p))
+        in_lines = iter(open(p))
+    else:
+        line_count = None
+        in_lines = (line for line in sys.stdin)
+    out_lines = pick(in_lines, row, col,line_count=line_count)
     for line in out_lines:
         print(line)
 

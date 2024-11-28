@@ -4,20 +4,21 @@ version = "0.1.0"
 description = "Command line tool for using getitem slice syntax to parse filter text"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+]
+
+[project.scripts]
+"pick" = "pick.pick:main"
 
 [tool.uv]
 dev-dependencies = [
     "pytest>=8.3.3",
+    "pip>=24.3.1",
+    "ipykernel>=6.29.5",
 ]
+package = true
 
 [tool.pytest.ini_options]
 pythonpath = ["src/pick"]
 
-
-
-
-
-[project.scripts]
-"pick" = "pick.pick:main"
 

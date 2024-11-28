@@ -26,12 +26,12 @@ nothing added to commit but untracked files present (use "git add" to track)
 
 s2 = ("""
 AAA
-BBB
+ BBB
 CCC
 """,
 ("1",":"),
 """
-BBB
+ BBB
 """
 )
 
@@ -67,27 +67,28 @@ s6 = (dirstring,
 """
 )
 
-def f(s): return textwrap.dedent(s).lstrip()
+def f(s): return s[1:] if s[0]=='\n' else s
 def g(t): return (f(t[0]),t[1],f(t[2]))
 
 tests:list[tuple] = [g(x) for x in [s1,s2,s3,s4,s5,s6]]
+#tests:list[tuple] = [g(x) for x in [s2]]
 
 @pytest.mark.parametrize("pidx", list(range(len(tests))))
 def test_run(pidx:int):
     s = tests[pidx]
-    lines = (line for line in s[0].strip().splitlines())
+    lines = list(line for line in s[0].splitlines())
     actual = list(pick(lines,s[1][0],s[1][1]))
-    expected = list(s[2].strip().splitlines())
+    expected = list(s[2].splitlines())
     assert actual == expected
 
 def test_parse_slices():
     from pick import parse_slice_spec
-    assert parse_slice_spec("5") == slice(5,6)
-    assert parse_slice_spec("0") == slice(0,1)
-    assert parse_slice_spec("-5") == slice(-5,-4)
-    assert parse_slice_spec("1:1") == slice(1,1)
-    assert parse_slice_spec("5:") == slice(5,float('inf'))
-    assert parse_slice_spec("-5:-2") == slice(-5,-2)
-    assert parse_slice_spec("-5:") == slice(-5,float('inf'))
-    assert parse_slice_spec(":-5") == slice(0,-5)
+    assert parse_slice_spec("5")     == (5  ,6)
+    assert parse_slice_spec("0")     == (0  ,1)
+    assert parse_slice_spec("-5")    == (-5 ,-4)
+    assert parse_slice_spec("1:1")   == (1  ,1)
+    assert parse_slice_spec("5:")    == (5  ,float('inf'))
+    assert parse_slice_spec("-5:-2") == (-5 ,-2)
+    assert parse_slice_spec("-5:")   == (-5 ,float('inf'))
+    assert parse_slice_spec(":-5")   == (0  ,-5)
     
