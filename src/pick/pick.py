@@ -49,14 +49,7 @@ def islice(iterable,slice_spec:str) -> Iterable:
 
     Consumes iterable once. Maintains a buffer if necessary.
     """
-    if ":" in slice_spec:
-        beg,end = tuple(slice_spec.split(":"))
-        beg = 0 if beg=='' else int(beg)
-        end = float('inf') if end=='' else int(end)
-    else:
-        beg = int(slice_spec)
-        end = beg + 1 if beg!=-1 else float('inf')
-    # assert: (beg,end):(+int,+int)
+    (beg,end) = parse_slice_spec(slice_spec)
     buf = None
     if beg < 0:
         buf = deque(maxlen=abs(beg))
