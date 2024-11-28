@@ -67,17 +67,55 @@ s5 = (dirstring,
 """
 )
 
+s6 = ("""
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+    echo "usage: make-linkfile.bash HTTP-URL TITLE"
+    echo
+    echo "To find links to nightlies, go to https://github.com/tensorflow/swift/blob/master/Installation.md "
+    echo
+    echo "A valid URL will look something like: https://storage.googleapis.com/swift-tensorflow-artifacts/releases/v0.3/rc1/swift-tensorflow-RELEASE-0.3-cuda10.0-cudnn7-ubuntu18.04.tar.gz"
+    exit 1
+else
+    url="$1"
+    title="$2"
+fi
+
+cat <<EOF > "${title}.html"
+<!DOCTYPE html><html>
+  <head><title>Redirecting to: ${url}</title>
+  <meta http-equiv = "refresh" content = "0;url='${url}'" />
+</head></html>
+EOF
+
+echo "Created file $(readlink -f "${title}.html")"
+""",
+("1:10",":"),
+"""
+if [ "$#" -ne 2 ]; then
+    echo "usage: make-linkfile.bash HTTP-URL TITLE"
+    echo
+    echo "To find links to nightlies, go to https://github.com/tensorflow/swift/blob/master/Installation.md "
+    echo
+    echo "A valid URL will look something like: https://storage.googleapis.com/swift-tensorflow-artifacts/releases/v0.3/rc1/swift-tensorflow-RELEASE-0.3-cuda10.0-cudnn7-ubuntu18.04.tar.gz"
+    exit 1
+else
+    url="$1"
+""")
+
 def f(s): return s[1:] if s[0]=='\n' else s
 def g(t): return (f(t[0]),t[1],f(t[2]))
 
-tests:list[tuple] = [g(x) for x in [s0,s1,s2,s3,s4,s5]]
+tests:list[tuple] = [g(x) for x in [s0,s1,s2,s3,s4,s5,s6]]
 
 @pytest.mark.parametrize("pidx", list(range(len(tests))))
 def test_run(pidx:int):
     s = tests[pidx]
     lines = list(line for line in s[0].splitlines())
     actual = list(pick(lines,s[1][0],s[1][1]))
+    print(f"ACTUAL:\n{actual}")
     expected = list(s[2].splitlines())
+    print(f"EXPECTED:\n{expected}")
     assert actual == expected
 
 def test_parse_slices():

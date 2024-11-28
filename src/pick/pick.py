@@ -28,6 +28,7 @@ def split_with_positions(str_to_split, pattern):
 
 def filtered_line(line:str, col_spec: str) -> str | None:
     "col : a slice or int"
+    eol_to_preserve = "\n" if line.endswith("\n") else ""
     fields = split_with_positions(line, r'\s+')
     sliced_fields = list(islice(fields,col_spec))
     if not sliced_fields: return None
@@ -38,7 +39,7 @@ def filtered_line(line:str, col_spec: str) -> str | None:
     if fl == line.strip():
         return line
     else:
-        return fl
+        return fl + eol_to_preserve
 
 def pick(lines:Iterable[str],row_spec:str,col_spec:str,line_count=None) -> Iterable[str]:
     out_lines = islice(lines,row_spec,iterable_len=line_count)
@@ -78,6 +79,8 @@ def islice(iterable,slice_spec:str,iterable_len=None) -> Iterable:
 
 def usage():
     epilog="""
+    Usage: program [-h] [-f FILE] row_spec col_spec
+
     Filter stdin and print specific rows and columns, specifying
     them in Python's slicing syntax.
     
@@ -97,7 +100,6 @@ def main():
     i = 0
     while i < len(args):
         if args[i] in ('-h', '--help'):
-            print("Usage: program [-h] [-f FILE] row_spec col_spec")
             usage()
             sys.exit(0)
         elif args[i] in ('-f', '--file'):
@@ -110,6 +112,9 @@ def main():
                 sys.exit(2)
         remaining_args.append(args[i])
         i += 1
+    if len(remaining_args[:2]) < 2:
+        usage()
+        sys.exit(1)
     (row,col) = tuple(remaining_args[:2])
     if (p:=input_file):
         line_count = sum(1 for _ in open(p))
@@ -119,7 +124,7 @@ def main():
         in_lines = (line for line in sys.stdin)
     out_lines = pick(in_lines, row, col,line_count=line_count)
     for line in out_lines:
-        print(line)
+        print(line,end="")
 
 if __name__ == "__main__":
     main()
