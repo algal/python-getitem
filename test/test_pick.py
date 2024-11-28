@@ -113,9 +113,7 @@ def test_run(pidx:int):
     s = tests[pidx]
     lines = list(line for line in s[0].splitlines())
     actual = list(pick(lines,s[1][0],s[1][1]))
-    print(f"ACTUAL:\n{actual}")
     expected = list(s[2].splitlines())
-    print(f"EXPECTED:\n{expected}")
     assert actual == expected
 
 def test_parse_slices():
