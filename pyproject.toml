@@ -8,6 +8,7 @@ dependencies = [
 ]
 
 [project.scripts]
+# define a script command named "pick" based on the main function the pick module in the pick pakage
 "pick" = "pick.pick:main"
 
 [tool.uv]
@@ -19,6 +20,6 @@ dev-dependencies = [
 package = true
 
 [tool.pytest.ini_options]
-pythonpath = ["src/pick"]
+pythonpath = ["src"]
 
 

@@ -1,7 +1,10 @@
 import pytest, os, tempfile, textwrap, sys
 from pathlib import Path
 
-from pick import pick
+# import directly from within the package, rather than relying on its exports
+from pick.pick import pick
+from pick.pick import parse_slice_spec
+
 
 s0:tuple[str,tuple[str,str],str] = ("""
 On branch dev-longcontexteval
@@ -117,7 +120,6 @@ def test_run(pidx:int):
     assert actual == expected
 
 def test_parse_slices():
-    from pick import parse_slice_spec
     assert parse_slice_spec("5")     == (5  ,6)
     assert parse_slice_spec("0")     == (0  ,1)
     assert parse_slice_spec("-5")    == (-5 ,-4)
