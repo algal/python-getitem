@@ -38,12 +38,12 @@ def filtered_line(line:str, col: slice) -> str | None:
 
 def pick(lines:Iterable[str],row_spec:str,col_spec:str) -> Iterable[str]:
     column = parse_slice_spec(col_spec)
-    out_lines = super_islice(lines,row_spec)
+    out_lines = islice(lines,row_spec)
     for line in out_lines:
         out = filtered_line(line,column)
         if out: yield out
 
-def super_islice(iterable,slice_spec:str) -> Iterable:
+def islice(iterable,slice_spec:str) -> Iterable:
     """
     slice_spec, a str of an index or a splice, like '-5:' etc..
 
