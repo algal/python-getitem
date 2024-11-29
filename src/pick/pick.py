@@ -35,11 +35,8 @@ def filtered_line(line:str, col_spec: str) -> str | None:
     col = parse_slice_spec(col_spec)
     start_pos = sliced_fields[  0 ][1]
     end_pos   = sliced_fields[ -1 ][2]
-    fl = line[start_pos:end_pos] # preserve spacing if passing the whole line
-    if fl == line.strip():
-        return line
-    else:
-        return fl + eol_to_preserve
+    fl = (" " * start_pos) + line[start_pos:end_pos] + eol_to_preserve
+    return fl
 
 def pick(lines:Iterable[str],row_spec:str,col_spec:str,line_count=None) -> Iterable[str]:
     out_lines = islice(lines,row_spec,iterable_len=line_count)
