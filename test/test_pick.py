@@ -3,7 +3,7 @@ from pathlib import Path
 
 # import directly from within the package, rather than relying on its exports
 from pick.pick import pick
-from pick.pick import parse_slice_spec
+from pick.pick import parse_slice_spec,slice_from_spec
 
 
 s0:tuple[str,tuple[str,str],str] = ("""
@@ -12,19 +12,19 @@ Your branch is up to date with 'origin/dev-longcontexteval'.
 
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
-	bert24-base-v2.yaml
-	r_first50000.json
-	src/evals/items2000.json
-	src/evals/rewritten10.json
+    bert24-base-v2.yaml
+    r_first50000.json
+    src/evals/items2000.json
+    src/evals/rewritten10.json
 
 nothing added to commit but untracked files present (use "git add" to track)
 """,
 ("5:-2",":"),
 """
-	bert24-base-v2.yaml
-	r_first50000.json
-	src/evals/items2000.json
-	src/evals/rewritten10.json
+    bert24-base-v2.yaml
+    r_first50000.json
+    src/evals/items2000.json
+    src/evals/rewritten10.json
 """)
 
 s1 = ("""
@@ -66,7 +66,7 @@ drwxrwxrwt - root      2024-11-21 12:25 Shared
 
 s5 = (dirstring,
     ("-2","-3:-1"),"""
-2023-09-17 14:13
+                       2023-09-17 14:13
 """
 )
 
@@ -128,4 +128,14 @@ def test_parse_slices():
     assert parse_slice_spec("-5:-2") == (-5 ,-2)
     assert parse_slice_spec("-5:")   == (-5 ,float('inf'))
     assert parse_slice_spec(":-5")   == (0  ,-5)
+    
+def test_slice_from_spec():
+    assert slice_from_spec("5")     == slice(5  ,6)
+    assert slice_from_spec("0")     == slice(0  ,1)
+    assert slice_from_spec("-5")    == slice(-5 ,-4)
+    assert slice_from_spec("1:1")   == slice(1  ,1)
+    assert slice_from_spec("5:")    == slice(5  ,None)
+    assert slice_from_spec("-5:-2") == slice(-5 ,-2)
+    assert slice_from_spec("-5:")   == slice(-5 ,None)
+    assert slice_from_spec(":-5")   == slice(0  ,-5)
     
