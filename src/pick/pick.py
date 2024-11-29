@@ -44,14 +44,40 @@ def pick(lines:Iterable[str],row_spec:str,col_spec:str,line_count=None) -> Itera
         out = filtered_line(line,col_spec)
         if out: yield out
 
+def islice2(iterable,sl:slice,iterable_len=None) -> Iterable:
+    "Consumes iterable once. Maintains a buffer if necessary."
+    def normalize(beg:int|None,end:int|None,length=None) -> tuple[int,int|None]:
+        begi:int = 0 if beg is None else beg
+        if length is not None:
+            begi = begi+length if begi<0 else begi
+            end = end+length if (isinstance(end,int) and end<0) else end
+        return (begi,end)
+    if hasattr(iterable,'__len__'): iterable_len = len(iterable)
+    (beg,end) = normalize(sl.start,sl.stop,length=iterable_len)
+    if beg < 0: buf = deque(maxlen=abs(beg))
+    elif isinstance(end,int) and end < 0: buf = deque()
+    else: buf = None
+    if buf is None:
+        src = enumerate(iterable)
+    else:
+        iterable_len = 0
+        for i,line in enumerate(iterable):
+            buf.append((i,line))
+            iterable_len += 1
+        (beg,end) = normalize(beg,end,iterable_len)
+        src = buf
+    for i,line in src:
+        if beg <= i and (end is None or i < end):
+            yield line
+
 def islice(iterable,slice_spec:str,iterable_len=None) -> Iterable:
     """
     slice_spec, a str of an index or a splice, like '-5:' etc..
 
     Consumes iterable once. Maintains a buffer if necessary.
     """
-    (beg,end) = parse_slice_spec(slice_spec)
     if hasattr(iterable,'__len__'): iterable_len = len(iterable)
+    (beg,end) = parse_slice_spec(slice_spec)
     if iterable_len is not None:
         beg = (beg + iterable_len) if (beg<0) else beg
         end = (end + iterable_len) if (end<0) else end
