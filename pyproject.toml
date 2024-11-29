@@ -1,5 +1,5 @@
 [project]
-name = "pick"
+name = "getitem"
 version = "0.1.0"
 description = "Command line tool for using getitem slice syntax to parse filter text"
 readme = "README.md"
@@ -9,7 +9,7 @@ dependencies = [
 
 [project.scripts]
 # define a script command named "pick" based on the main function the pick module in the pick pakage
-"pick" = "pick.pick:main"
+"getitem" = "getitem.getitem:main"
 
 [tool.uv]
 dev-dependencies = [

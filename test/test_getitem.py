@@ -2,8 +2,8 @@ import pytest, os, tempfile, textwrap, sys
 from pathlib import Path
 
 # import directly from within the package, rather than relying on its exports
-from pick.pick import pick
-from pick.pick import parse_slice_spec,slice_from_spec
+from getitem.getitem import pick
+from getitem.getitem import parse_slice_spec,slice_from_spec
 
 
 s0:tuple[str,tuple[str,str],str] = ("""

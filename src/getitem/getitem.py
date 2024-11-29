@@ -85,16 +85,16 @@ def islice(iterable,sl:slice,iterable_len=None) -> Iterable:
 
 def usage():
     epilog="""
-    Usage: program [-h] [-f FILE] row_spec col_spec
+    Usage: getitem [-h] [-f FILE] row_spec col_spec
 
     Filter stdin and print specific rows and columns, specifying
     them in Python's slicing syntax.
     
     For example:
-    cat myfile | ./pick :5 0     # Print the column 0 of the first 5 rows.
-    cat myfile | ./pick 0 :      # Print the first row, all of it.
-    cat myfile | ./pick -10 0:2  # Print the first 2 columns of the last 10 rows.
-    cat myfile | ./pick -2:-1 : # Prints all fields of the second to last row.
+    cat myfile | ./getitem :5 0     # Print the column 0 of the first 5 rows.
+    cat myfile | ./getitem 0 :      # Print the first row, all of it.
+    cat myfile | ./getitem -10 0:2  # Print the first 2 columns of the last 10 rows.
+    cat myfile | ./getitem -2:-1 : # Prints all fields of the second to last row.
     """
     print(epilog)
 
