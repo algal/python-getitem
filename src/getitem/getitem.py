@@ -88,7 +88,9 @@ def usage():
     Usage: getitem [-h] [-f FILE] row_spec col_spec
 
     Filter stdin and print specific rows and columns, specifying
-    them in Python's slicing syntax.
+    them in Python's slicing syntax, separating columns by whitespace.
+
+    If passed FILE, it will read the file twice but not buffer.
     
     For example:
     cat myfile | ./getitem :5 0     # Print the column 0 of the first 5 rows.
