@@ -8,7 +8,7 @@ dependencies = [
 ]
 
 [project.scripts]
-# define a script command named "pick" based on the main function the pick module in the pick pakage
+# define a script command named "getitem" based on the main function the getitem module in the getitem package
 "getitem" = "getitem.getitem:main"
 
 [tool.uv]
