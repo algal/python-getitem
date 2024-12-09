@@ -3,7 +3,7 @@ from pathlib import Path
 
 # import directly from within the package, rather than relying on its exports
 from getitem.getitem import pick
-from getitem.getitem import parse_slice_spec,slice_from_spec
+from getitem.getitem import slice_from_spec
 
 
 s0:tuple[str,tuple[str,str],str] = ("""
@@ -119,16 +119,6 @@ def test_run(pidx:int):
     expected = list(s[2].splitlines())
     assert actual == expected
 
-def test_parse_slices():
-    assert parse_slice_spec("5")     == (5  ,6)
-    assert parse_slice_spec("0")     == (0  ,1)
-    assert parse_slice_spec("-5")    == (-5 ,-4)
-    assert parse_slice_spec("1:1")   == (1  ,1)
-    assert parse_slice_spec("5:")    == (5  ,float('inf'))
-    assert parse_slice_spec("-5:-2") == (-5 ,-2)
-    assert parse_slice_spec("-5:")   == (-5 ,float('inf'))
-    assert parse_slice_spec(":-5")   == (0  ,-5)
-    
 def test_slice_from_spec():
     assert slice_from_spec("5")     == slice(5  ,6)
     assert slice_from_spec("0")     == slice(0  ,1)

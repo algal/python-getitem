@@ -14,17 +14,6 @@ def slice_from_spec(slice_spec:str) -> slice:
         end = beg + 1 if beg!=-1 else None
     return slice(beg,end)
 
-def parse_slice_spec(slice_spec:str,should_decr_pos:bool=False) -> tuple:
-    "parses value into an (int,int)"
-    if ":" in slice_spec:
-        beg,end = tuple(slice_spec.split(":"))
-        beg = 0 if beg=='' else int(beg)
-        end = float('inf') if end=='' else int(end)
-    else:
-        beg = int(slice_spec)
-        end = beg + 1 if beg!=-1 else float('inf')
-    return (beg,end)
-
 def split_with_positions(str_to_split, pattern):
     "Returns [(s,beg,end)] for the substrings in between the pattern"
     result = []
